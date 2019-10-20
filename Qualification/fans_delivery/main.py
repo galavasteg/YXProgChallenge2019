@@ -10,6 +10,7 @@
 """
 
 from pathlib import Path
+from functools import reduce
 from collections import namedtuple
 
 
@@ -37,6 +38,25 @@ def load_input(fn='input.txt') -> tuple:
     return fans, related_fans, car_type_details
 
 
+def get_groups(fans: set, relates: tuple) -> tuple:
+    all_freinds = reduce(lambda x, y: x.union(set(y)), relates, set())
+    loners = fans.difference(all_freinds)
+
+    def add2team(teams: list, friends: set):
+        added = False
+        for i, team in enumerate(teams):
+            if any(fan in team for fan in friends):
+                teams[i] = team.union(friends)
+                added = True
+        if not added:
+            teams.append(friends)
+        return teams
+
+    teams = reduce(add2team, relates, [])
+
+    return tuple([{fan} for fan in loners] + teams)
+
+
 def main():
     possible = 1
 
@@ -51,6 +71,16 @@ def main():
     # Is there enough seats?
     if len(fans) > sum(cars):
         possible = 0
+    else:
+        groups = get_groups(fans, relates)
+        # # check all fans in groups
+        # assert fans == reduce(
+        #         lambda x, y: x.union(y), groups, set())
+
+        # Is there enough cars?
+        if len(groups) > len(cars):
+            possible = 0
+
     print(possible)
 
 
