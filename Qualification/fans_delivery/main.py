@@ -80,6 +80,18 @@ def main():
         # Is there enough cars?
         if len(groups) > len(cars):
             possible = 0
+        else:
+            group_sizes = sorted(map(len, groups),
+                                 reverse=True)
+
+            some_group_is_too_big = any(
+                group_fans > car_cap
+                for group_fans, car_cap
+                in zip(group_sizes, cars)
+            )
+
+            if some_group_is_too_big:
+                possible = 0
 
     print(possible)
 
